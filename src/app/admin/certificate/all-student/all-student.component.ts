@@ -55,7 +55,7 @@ export interface EnrolledCourses {
 export class AllStudentComponent implements OnInit {
   mode = new FormControl('side')
   students
-  displayedColumns: string[] = ['clientId2', 'name', 'email2', 'course', 'startDate2', 'endDate2', 'certificateType', 'certificate', 'actions2']
+  displayedColumns: string[] = ['clientId2', 'name', 'email2', 'course', 'startDate2', 'endDate2', 'certificateType', 'issueDate', 'certificate', 'actions2']
   dataSource: MatTableDataSource<Students>
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator
   @ViewChild(MatSort, { static: true }) sort: MatSort
@@ -75,6 +75,7 @@ export class AllStudentComponent implements OnInit {
   courseFilter = new FormControl('')
   startDateFilter = new FormControl('')
   endDateFilter = new FormControl('')
+  issueDateFilter = new FormControl('')
   certificateType = new FormControl('')
   certificate = new FormControl('')
 
@@ -85,7 +86,8 @@ export class AllStudentComponent implements OnInit {
     email: '',
     coursecode: '',
     startdate: '',
-    enddate: ''
+    enddate: '',
+    issuedate: ''
   }
   allCourseIntakeDate
   courseIntakeDateId = ''
@@ -189,6 +191,10 @@ export class AllStudentComponent implements OnInit {
       this.filteredValues.enddate = endDate;
       this.dataSource.filter = JSON.stringify(this.filteredValues)
     })
+    this.issueDateFilter.valueChanges.subscribe(issueDate => {
+      this.filteredValues.issuedate = issueDate;
+      this.dataSource.filter = JSON.stringify(this.filteredValues)
+    })
   }
   getStudents() {
     this.apiService.getAPI('getstudentcertificatelist').subscribe((data) => {
@@ -201,6 +207,7 @@ export class AllStudentComponent implements OnInit {
         // 2. Transform dates
         student.startDate = this.datePipe.transform(student.startdate, 'dd/MM/yyyy');
         student.endDate = this.datePipe.transform(student.enddate, 'dd/MM/yyyy');
+        student.issueDate = this.datePipe.transform(student.certificateissuedate, 'dd/MM/yyyy') || '';
 
         // 3. Set null for empty string
         if (student.certificatepath === "") {
@@ -249,7 +256,8 @@ export class AllStudentComponent implements OnInit {
         && data.email.toLowerCase().indexOf(searchTerms.email.toLowerCase()) !== -1
         && (data.coursecode || '').toLowerCase().indexOf(searchTerms.coursecode.toLowerCase()) !== -1
         && (data.startdate || '').toLowerCase().indexOf(searchTerms.startdate.toLowerCase()) !== -1
-        && (data.enddate || '').toLowerCase().indexOf(searchTerms.enddate.toLowerCase()) !== -1;
+        && (data.enddate || '').toLowerCase().indexOf(searchTerms.enddate.toLowerCase()) !== -1
+        && (data.issueDate || '').toLowerCase().indexOf((searchTerms.issuedate || '').toLowerCase()) !== -1;
     }
     return filterFunction;
   }
@@ -301,6 +309,7 @@ export class AllStudentComponent implements OnInit {
             // (Note: This creates new properties 'startDate' and 'endDate' from lowercase versions)
             student.startDate = this.datePipe.transform(student.startdate, 'dd/MM/yyyy');
             student.endDate = this.datePipe.transform(student.enddate, 'dd/MM/yyyy');
+            student.issueDate = this.datePipe.transform(student.certificateissuedate, 'dd/MM/yyyy') || '';
 
             // 3. Set null for empty string
             if (student.certificatepath === "") {

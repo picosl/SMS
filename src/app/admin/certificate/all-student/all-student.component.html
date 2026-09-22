@@ -273,6 +273,17 @@
                         <label *ngIf="row.certificatetype == 'O'">Statement</label>
                       </mat-cell>
                     </ng-container>
+                    <ng-container matColumnDef="issueDate">
+                      <mat-header-cell *matHeaderCellDef style="font-size: 13px !important">
+                        <mat-form-field class="filter" floatLabel="never" style=" width: 80px">
+                          <mat-label style="color: white; font-size: 15px;">Issue Date</mat-label>
+                          <input matInput [formControl]="issueDateFilter" class="white-cursor">
+                        </mat-form-field>
+                      </mat-header-cell>
+                      <mat-cell *matCellDef="let row" data-toggle="tooltip" data-placement="right"
+                        > {{row.issueDate}}
+                      </mat-cell>
+                    </ng-container>
                     <ng-container matColumnDef="certificate">
                       <mat-header-cell *matHeaderCellDef style="text-align: center;" style="font-size: 13px !important">
                         <mat-form-field floatLabel="never">
