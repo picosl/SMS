@@ -461,6 +461,9 @@ export class CertificateComponent implements OnInit, OnDestroy {
     else if (location === 'G') {
         reportName += '_Gold';
     }
+     else if (location === 'P') {
+        reportName += '_Perth';
+    }
 }
 
     const url =
