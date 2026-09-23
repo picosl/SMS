@@ -30,6 +30,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressButtonsModule } from 'mat-progress-buttons';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
@@ -77,7 +78,8 @@ import { DeleteStudentDocumentComponent } from './dialogs/delete-student-documen
     MatPaginatorModule,
     MatTableModule,
     MatTabsModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ],
 })
 export class DashboardModule {}
