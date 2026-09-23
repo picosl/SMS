@@ -410,11 +410,14 @@ export class CertificateComponent implements OnInit, OnDestroy {
       case 'C':
         if (this.HFormGroup1.value.certificateReportType === 'certificate_complete') {
         return 'certificate_complete';
-    }
+        }
 
-    if (isCollege23 && isNSW) {
-        return `certificate_nsw_${this.HFormGroup1.value.staffId}`;
-    }
+        if (isCollege23 && isNSW) {
+            return `certificate_nsw_${this.HFormGroup1.value.staffId}`;
+        }
+        if (this.trainingActId.length > 25) {
+        return 'extcertificate';
+        }
         else {
           return `certificate`;
         }
