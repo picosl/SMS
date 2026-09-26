@@ -174,7 +174,9 @@ export class AllStudentComponent implements OnInit {
   ngOnInit() {
     this.userInfo = JSON.parse(localStorage.getItem("currentUser"));
     this.getAll = JSON.parse(window.localStorage.getItem('getAll'))
-    this.showDomesticBadge = Number(this.Did) === 13;
+    // this.showDomesticBadge = Number(this.Did) === 13 ;
+    this.showDomesticBadge = Number(this.Did) === 13 || Number(this.Did) === 38;
+    console.log('showDomesticBadge', this.showDomesticBadge, 'Did', this.Did)
     this.allApplicationStatus = this.getAll[0].ApplicationStatus
     this.allApplicationStatus.push({
       applicationstatusname: "All",
