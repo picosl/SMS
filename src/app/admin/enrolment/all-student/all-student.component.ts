@@ -175,7 +175,7 @@ export class AllStudentComponent implements OnInit {
     this.userInfo = JSON.parse(localStorage.getItem("currentUser"));
     this.getAll = JSON.parse(window.localStorage.getItem('getAll'))
     // this.showDomesticBadge = Number(this.Did) === 13 ;
-    this.showDomesticBadge = Number(this.Did) === 13 || Number(this.Did) === 38;
+    this.showDomesticBadge = Number(this.Did) === 13;
     console.log('showDomesticBadge', this.showDomesticBadge, 'Did', this.Did)
     this.allApplicationStatus = this.getAll[0].ApplicationStatus
     this.allApplicationStatus.push({
@@ -292,7 +292,7 @@ export class AllStudentComponent implements OnInit {
     let sqlquery = ["a.studentid,a.clientid,a.firstname, a.lastname, a.coursecode, a.coursename, a.classname,a.commencementdate,a.expectedcompletiondate,a.applicationstatusname,a.studentenrolmentid,a.email, a.altemail"];
     
     // console.log("did", this.Did, 'type', typeof(this.Did))
-    if (this.Did == '13'){
+    if (this.Did == '13' || this.Did == '38'){
       sqlquery = ["a.studentid,a.clientid,a.firstname, a.lastname, a.coursecode, a.coursename, a.classname,a.commencementdate,a.expectedcompletiondate,a.applicationstatusname,a.studentenrolmentid,a.email,a.altemail,a.domesticstudent"];
 
     }
@@ -389,7 +389,7 @@ export class AllStudentComponent implements OnInit {
   search(cid: any, aid: any, asid: any, clid: any, uid: any, name: any, email: any, classname: any) {
     let queryParams = [];
     let sqlquery = ["a.studentid,a.clientid,a.firstname, a.lastname, a.coursecode, a.coursename, a.classname,a.commencementdate,a.expectedcompletiondate,a.applicationstatusname,a.studentenrolmentid,a.email,a.altemail"];
-    if (this.Did == '13'){
+    if (this.Did == '13' || this.Did == '38'){
       sqlquery = ["a.studentid,a.clientid,a.firstname, a.lastname, a.coursecode, a.coursename, a.classname,a.commencementdate,a.expectedcompletiondate,a.applicationstatusname,a.studentenrolmentid,a.email,a.altemail,a.domesticstudent"];
 
     }
