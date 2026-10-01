@@ -620,19 +620,24 @@ export class AllStudentComponent implements OnInit {
   classAsign(ecd, cd, id) {
     this.router.navigate([`/admin/enrolment/asign-class/${ecd}/${cd}/${id}`]);
   }
-  downloadOfferLetter(data) {
-    console.log(data);
-    if (data.applicationstatusname == "Cancelled") {
-      window.open(
-        `https://api.wonderit.com.au:8000/report/offer_letter_by_enrolmentid?inst_id=${this.userInfo.college_id}&sid=${data.studentenrolmentid}`
-      );
-    }
-    else {
-      window.open(
-        `https://api.wonderit.com.au:8000/report/offer_letter?inst_id=${this.userInfo.college_id}&sid=${data.studentid}`
-      );
-    }
+  
+ downloadOfferLetter(data) {
+  console.log(data);
+
+  const isInternational =
+    (data.domesticstudent || '').toString().trim().toLowerCase() === 'no' ? 1 : 0;
+
+  if (data.applicationstatusname == "Cancelled") {
+    window.open(
+      `https://api.wonderit.com.au:8000/report/offer_letter_by_enrolmentid?inst_id=${this.userInfo.college_id}&sid=${data.studentenrolmentid}&is_international=${isInternational}`
+    );
+  } else {
+    window.open(
+      `https://api.wonderit.com.au:8000/report/offer_letter?inst_id=${this.userInfo.college_id}&sid=${data.studentid}&is_international=${isInternational}`
+    );
   }
+}
+
   assignUnits(id) {
     this.router.navigate([`/admin/enrolment/assign-units/${id}`]);
   }
