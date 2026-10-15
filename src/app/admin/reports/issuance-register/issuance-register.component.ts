@@ -115,6 +115,11 @@ export class IssuanceRegisterComponent implements OnInit {
       firstname: item.firstname?.trim(),
       lastname: item.lastname?.trim(),
       companyName: item.companyname?.trim(),
+      gender: item.gender?.trim().toUpperCase() === 'M'
+      ? 'Male'
+      : item.gender?.trim().toUpperCase() === 'F'
+        ? 'Female'
+        : item.gender?.trim() || '',
       studentEmail: item.studentemail?.trim(),
       studentEmail2: item.studentemail2?.trim(),
       studentEmail3: item.studentemail3?.trim(),
