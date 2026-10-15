@@ -123,6 +123,15 @@ export class MainComponent implements OnInit {
   totalUnits = 0
   panelExpanded = true;
   userInfo: any;
+  dashboardData: any = {}
+  courseSummary: any[] = []
+  totalStudentCount = 0
+  enrolledThisMonth = 0
+  enrolledGrowthCount = 0
+  enrolledGrowthPercent = 0
+  totalCertificateIssued = 0
+  totalPending = 0
+  courseColors = ['purple', 'blue', 'green', 'orange', 'red', 'cyan', 'card4', 'purple-dark']
   constructor(
     private fb: FormBuilder,
     public dialog: MatDialog,
@@ -255,22 +264,23 @@ export class MainComponent implements OnInit {
   getStudents() {
     this.apiService.getAPI('getstudentlist').subscribe((data) => {
       this.students = data['data']
-      if (this.students[0].msg) {
+
+      this.dashboardData = data['dashboard'] || {}
+      this.courseSummary = this.dashboardData.courseSummary || []
+      this.totalStudentCount = this.dashboardData.totalStudent || 0
+      this.enrolledThisMonth = this.dashboardData.enrolledThisMonth || 0
+      this.enrolledGrowthCount = this.dashboardData.enrolledGrowthCount || 0
+      this.enrolledGrowthPercent = this.dashboardData.enrolledGrowthPercent || 0
+      this.totalCertificateIssued = this.dashboardData.totalCertificateIssued || 0
+      this.totalPending = this.dashboardData.totalPending || 0
+
+      if (!this.students || this.students.length === 0 || this.students[0].msg) {
         this.totalStudent = 0
       }
       else {
         this.totalStudent = this.students.length
         for (var i in this.students) {
-          this.students[i].startdate = this.datePipe.transform(this.students[i].startdate, 'dd/MM/yyyy')
-          this.students[i].enddate = this.datePipe.transform(this.students[i].enddate, 'dd/MM/yyyy')
-          this.students[i].firstname = this.students[i].firstname + ' ' + this.students[i].lastname
-          // if(this.students[i].coursecode == null){
-          //   this.students[i].course = '';
-          // }
-          // else{
-          //   this.students[i].course = this.students[i].coursecode + ' - ' + this.students[i].coursename
-          // }
-
+          this.students[i].firstname = (this.students[i].firstname || '') + ' ' + (this.students[i].lastname || '')
         }
         this.students = this.students.sort((a, b) => {
           if (a.clientid < b.clientid) {

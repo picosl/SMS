@@ -1,38 +1,42 @@
 <section class="content">
   <div class="container-fluid">
-    <div class="row">
-      <div class="col-lg-6 col-sm-6">
-        <div class="info-box7 l-bg-purple order-info-box7">
+    <div class="row align-items-stretch">
+      <div class="col-lg-3 col-sm-6 d-flex">
+        <div class="info-box7 l-bg-purple order-info-box7 w-100">
           <div class="info-box7-block">
-            <h6 class="m-b-20">Total Student</h6>
-            <h2 class="text-end"><i class="fas fa-users pull-left"></i><span>{{this.totalStudent}}</span></h2>
-            <!-- <p class="m-b-0">18% Higher Then Last Month</p> -->
+            <h6 class="m-b-20">Total Students</h6>
+            <h2 class="text-end"><i class="fas fa-users pull-left"></i><span>{{this.totalStudentCount}}</span></h2>
+            <p class="m-b-0 growth-placeholder">&nbsp;</p>
           </div>
         </div>
       </div>
-      <!-- <div class="col-lg-3 col-sm-6">
-        <div class="info-box7 l-bg-blue order-info-box7">
+      <div class="col-lg-3 col-sm-6 d-flex">
+        <div class="info-box7 l-bg-blue order-info-box7 w-100">
           <div class="info-box7-block">
-            <h6 class="m-b-20">Total Course</h6>
-            <h2 class="text-end"><i class="fas fa-book-open pull-left"></i><span>{{this.totalCourse}}</span></h2> -->
-            <!-- <p class="m-b-0">21% Higher Then Last Month</p> -->
-          <!-- </div>
-        </div>
-      </div> -->
-      <!-- <div class="col-lg-4 col-sm-6">
-        <div class="info-box7 l-bg-green order-info-box7">
-          <div class="info-box7-block">
-            <h6 class="m-b-20">Total Units</h6>
-            <h2 class="text-end"><i class="fa fa-book pull-left"></i><span>{{this.totalUnits}}</span></h2>
+            <h6 class="m-b-20">Enrolled This Month</h6>
+            <h2 class="text-end"><i class="fas fa-calendar-alt pull-left"></i><span>{{this.enrolledThisMonth}}</span></h2>
+            <p class="m-b-0">
+              <i class="material-icons" [ngClass]="this.enrolledGrowthCount >= 0 ? 'col-green' : 'col-red'" style="font-size: 14px; vertical-align: middle;">{{this.enrolledGrowthCount >= 0 ? 'trending_up' : 'trending_down'}}</i>
+              Growth {{this.enrolledGrowthPercent}}% / {{this.enrolledGrowthCount}}
+            </p>
           </div>
         </div>
-      </div> -->
-      <div class="col-lg-6 col-sm-6">
-        <div class="info-box7 l-bg-orange order-info-box7">
+      </div>
+      <div class="col-lg-3 col-sm-6 d-flex">
+        <div class="info-box7 l-bg-card4 order-info-box7 w-100">
           <div class="info-box7-block">
-            <h6 class="m-b-20">Certificates</h6>
-            <h2 class="text-end"><i class="	fas fa-graduation-cap pull-left"></i><span>00</span></h2>
-            <!-- <p class="m-b-0">10% Higher Then Last Month</p> -->
+            <h6 class="m-b-20">Total Certificates Issued</h6>
+            <h2 class="text-end"><i class="fas fa-graduation-cap pull-left"></i><span>{{this.totalCertificateIssued}}</span></h2>
+            <p class="m-b-0 growth-placeholder">&nbsp;</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-sm-6 d-flex">
+        <div class="info-box7 l-bg-orange order-info-box7 w-100">
+          <div class="info-box7-block">
+            <h6 class="m-b-20">Total Pending Certificates</h6>
+            <h2 class="text-end"><i class="fas fa-hourglass-half pull-left"></i><span>{{this.totalPending}}</span></h2>
+            <p class="m-b-0 growth-placeholder">&nbsp;</p>
           </div>
         </div>
       </div>
@@ -198,13 +202,34 @@
       </div>
     </div> -->
     <div class="row clearfix">
-      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
         <mat-expansion-panel [expanded]="panelExpanded">
           <mat-expansion-panel-header>
-            All Students ({{this.totalStudent}})
+            Course Summary
           </mat-expansion-panel-header>
           <div class="body">
-            <div class="courseIntake">
+            <h6 class="tx-primary m-b-15">Course List and Number of Students</h6>
+            <ul class="list-group course-summary-list">
+              <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let course of courseSummary; let i = index">
+                <span class="d-flex align-items-center">
+                  <span class="course-icon" [ngClass]="'l-bg-' + courseColors[i % courseColors.length]">
+                    <i class="fas fa-graduation-cap"></i>
+                  </span>
+                  <span class="course-name" [matTooltip]="course.courseName" matTooltipPosition="above">{{course.courseName}}</span>
+                </span>
+                <span class="badge badge-primary course-count">{{course.studentCount}}</span>
+              </li>
+            </ul>
+          </div>
+        </mat-expansion-panel>
+      </div>
+      <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+        <mat-expansion-panel [expanded]="panelExpanded">
+          <mat-expansion-panel-header>
+            All Enrollments ({{this.totalStudent}})
+          </mat-expansion-panel-header>
+          <div class="body">
+            <div class="courseIntake responsive_table">
               <mat-table #table [dataSource]="dataSource" matSort #tableTwoSort="matSort" class="mat-cell">
                 <ng-container matColumnDef="bulkClientId">
                   <mat-header-cell class="pr-0 mw-10" *matHeaderCellDef style="font-size: 13px !important;">
