@@ -1,0 +1,77 @@
+<section class="content">
+    <div class="container-fluid">
+      <div class="row clearfix newStudent">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+          <div class="card">
+            <div class="header">
+              <h2>Certificate Summary</h2>
+            </div>
+            <div class="body">
+              <div class="container">
+                  <div class="row">
+                    <div *ngIf="dateValidate1.isError" class="alert alert-danger col-4 m-auto" id="closebtn">
+                      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                      <strong>Warning!</strong> {{ dateValidate1.errorMessage }}
+                    </div>
+                  </div>
+                  <div class="row mt-4">
+                      <div class="col-xl-10 col-lg-10 col-md-10 col-sm-12 offset-xl-1 offset-lg-1 offset-md-1">
+                          <form [formGroup]="HFormGroup1" (ngSubmit)="certificateSummarySubmit()">
+                              <div class="row">
+                                  <div class="col-xl-10 col-lg-10 col-md-10 col-sm-12 mb-2">
+                                      <mat-form-field class="example-full-width mb-3">
+                                      <mat-label>Course</mat-label>
+                                      <mat-select formControlName="courseId" required>
+                                          <mat-option [value]="'all'">All</mat-option>
+                                          <mat-option *ngFor="let course of allCourses" [value]="course.courseid">
+                                              {{ course.coursecode }} - {{ course.coursename }}
+                                          </mat-option>
+                                      </mat-select>
+                                      <mat-error *ngIf="HFormGroup1.get('courseId').hasError('required')">
+                                          Course is required
+                                      </mat-error>
+                                      </mat-form-field>
+                                  </div>
+                              </div>
+                              <div class="row">
+                                  <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12 mb-2">
+                                      <mat-form-field class="example-full-width mb-3">
+                                      <mat-label>Start Date</mat-label>
+                                      <input matInput [matDatepicker]="basicDatepicker1" formControlName="certificateIssueDateFrom"
+                                          (ngModelChange)="compareTwoDates1()" required>
+                                      <mat-datepicker-toggle matSuffix [for]="basicDatepicker1">
+                                      </mat-datepicker-toggle>
+                                      <mat-datepicker #basicDatepicker1></mat-datepicker>
+                                      <mat-error *ngIf="HFormGroup1.get('certificateIssueDateFrom').hasError('required')">
+                                          Please select start date
+                                      </mat-error>
+                                      </mat-form-field>
+                                  </div>
+                                  <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12 mb-2">
+                                      <mat-form-field class="example-full-width mb-3">
+                                      <mat-label>End Date</mat-label>
+                                      <input matInput [matDatepicker]="basicDatepicker2" formControlName="certificateIssueDateTo"
+                                          (ngModelChange)="compareTwoDates1()" required>
+                                      <mat-datepicker-toggle matSuffix [for]="basicDatepicker2">
+                                      </mat-datepicker-toggle>
+                                      <mat-datepicker #basicDatepicker2></mat-datepicker>
+                                      <mat-error
+                                          *ngIf="HFormGroup1.get('certificateIssueDateTo').hasError('required') || dateValidate1.isError">
+                                          Please select end date
+                                      </mat-error>
+                                      </mat-form-field>
+                                  </div>
+                                  <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
+                                      <button mat-raised-button color="primary">Download</button>
+                                  </div>
+                              </div>
+                          </form>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>

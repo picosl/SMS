@@ -5,6 +5,7 @@ import { AsqaComponent} from './asqa/asqa.component'
 import { StudentsPaymentsComponent } from './students-payments/students-payments.component';
 import { IssuanceRegisterComponent } from './issuance-register/issuance-register.component';
 import { SledReportComponent } from './sled-report/sled-report.component';
+import { CertificateSummaryComponent } from './certificate-summary/certificate-summary.component';
 const routes: Routes = [
   {
     path: 'avetmiss',
@@ -26,6 +27,10 @@ const routes: Routes = [
   {
     path: 'sled-report',
     component: SledReportComponent
+  },
+  {
+    path: 'certificate-summary',
+    component: CertificateSummaryComponent
   }
 ];
 
