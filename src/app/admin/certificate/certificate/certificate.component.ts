@@ -340,7 +340,7 @@ export class CertificateComponent implements OnInit, OnDestroy {
     })
   }
 
-  getCertificate() {
+   getCertificate() {
     this.disabled = true;
     this.error.isError = false;
     this.error.errorMessage = '';
@@ -358,6 +358,7 @@ export class CertificateComponent implements OnInit, OnDestroy {
     if (certificateBody.certificateType === 'C' || certificateBody.certificateType === 'R') {
       nums = this.trainingActId.map(act => act.trainingactivityid);
     } else {
+      // S, O and F use only the units ticked in the Outcome table
       nums = rows.map(rowIndex => this.trainingActId[rowIndex].trainingactivityid);
     }
 
@@ -365,7 +366,10 @@ export class CertificateComponent implements OnInit, OnDestroy {
     certificateBody.studentEnrolmentId = parseInt(this.enrolemntID, 10);
     certificateBody.userId = this.userInfo.userid;
 
-    if (!this.outcomeCheck.msg && certificateBody.certificateType !== 'S') {
+    const skipOutcomeCheck =
+      certificateBody.certificateType === 'S' || certificateBody.certificateType === 'F';
+
+    if (!this.outcomeCheck.msg && !skipOutcomeCheck) {
       this.errorsReq = { isError: true, errorMessage: this.outcomeCheck[0].error_msg };
       window.scroll(0, 0);
       this._showErrorUI();
@@ -405,15 +409,13 @@ export class CertificateComponent implements OnInit, OnDestroy {
         if (isCollege23 && isNSW) {
           return `certificate_nsw_${this.HFormGroup1.value.staffId}`;
         }
-        else {
-          return `certificate`;
-        }
+        return 'certificate';
 
-     case 'S':
-      if (this.trainingActId.length > 25) {
-        return 'soa_ext';
-      }
-      return 'attainment';
+      case 'S':
+        if (this.trainingActId.length > 25) {
+          return 'soa_ext';
+        }
+        return 'attainment';
 
       case 'O':
         return 'qualification_attainment';
@@ -421,6 +423,9 @@ export class CertificateComponent implements OnInit, OnDestroy {
       case 'R':
         if (isCollege23 && isNSW) return 'sor_nsw';
         return 'sor';
+
+      case 'F':
+        return 'first_aid';
 
       default:
         return null;

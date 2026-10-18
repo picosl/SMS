@@ -116,6 +116,9 @@
                         <mat-radio-button
                           class="example-margin d-xs-inline-block d-sm-inline-block d-md-inline-block d-lg-inline-block"
                           value="R">Statement of Result</mat-radio-button>
+                           <mat-radio-button
+                          class="example-margin d-xs-inline-block d-sm-inline-block d-md-inline-block d-lg-inline-block"
+                          value="F">First Aid</mat-radio-button>
                       </mat-radio-group>
                     </div>
                     <div *ngIf="this.userInfo.college_id !== 23" class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
@@ -149,6 +152,7 @@
                         <mat-radio-button
                           class="example-margin d-xs-inline-block d-sm-inline-block d-md-inline-block d-lg-inline-block"
                           value="R">Statement of Result</mat-radio-button>
+                       
                       </mat-radio-group>
                     </div>
                     <div *ngIf="this.userInfo.college_id === 23" class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
@@ -174,9 +178,9 @@
                         <mat-error *ngIf="HFormGroup1.get('completionDate').hasError('required')">
                           Please select completion date
                         </mat-error>
-                        
+
                       </mat-form-field>
-                      
+
                     </div>
                     <div *ngIf="this.userInfo.college_id === 23" class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                       <mat-form-field class="example-full-width mb-3">
@@ -202,9 +206,10 @@
                           Please select completion date
                         </mat-error>
                       </mat-form-field>
-                      <div *ngIf="this.userInfo.college_id === 13" class="text" style="margin-top: -15px; margin-bottom: 10px; color: red;">
-                          <small>[NB: Completion date will act as end date in certificate]</small>
-                        </div>
+                      <div *ngIf="this.userInfo.college_id === 13" class="text"
+                        style="margin-top: -15px; margin-bottom: 10px; color: red;">
+                        <small>[NB: Completion date will act as end date in certificate]</small>
+                      </div>
                     </div>
                     <div *ngIf="this.userInfo.college_id !== 23" class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                       <mat-form-field class="example-full-width mb-3">
@@ -221,7 +226,7 @@
                   </div>
                 </div>
                 <div
-                  [ngClass]="HFormGroup1.get('certificateType').value == 'S' || HFormGroup1.get('certificateType').value == 'O' ? 'd-block' : 'd-none'">
+  [ngClass]="HFormGroup1.get('certificateType').value == 'S' || HFormGroup1.get('certificateType').value == 'O' || HFormGroup1.get('certificateType').value == 'F' ? 'd-block' : 'd-none'">
                   <div class="row">
                     <span class="section-heading"><i class='fas fa-bars'></i>Outcome</span>
                   </div>
