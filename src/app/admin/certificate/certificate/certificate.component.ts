@@ -21,6 +21,9 @@ import { finalize } from 'rxjs/operators';
 
 const moment = _rollupMoment || _moment;
 
+/** Certificates with more units than this always use the extended report. */
+const EXT_CERTIFICATE_UNIT_LIMIT = 25;
+
 export interface outcome {
   rowID
   units: string
@@ -142,9 +145,10 @@ export class CertificateComponent implements OnInit, OnDestroy {
       certificateIssueDate: ['', Validators.required],
       certificateIssueNumber: ['', [Validators.maxLength(25)]],
       certificateType: ['C'],
-        certificateReportType: ['certificate'],
-        authority: ['C'],
-         location_type: ['M'],
+      certificateReportType: ['certificate'],
+      authority: ['C'],
+      location_type: ['M'],
+      pageCount: ['2'], // > 25 units only: '2' = extcertificate, '3' = temp_extcertificate (non-23 only)
       rtoType: ['L'],
       trainingActivityId: [''],
       Issuedflag: ['Y', [Validators.maxLength(10)]],
@@ -218,6 +222,34 @@ export class CertificateComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Number of units loaded for this enrolment (0 until the API responds). */
+  get unitCount(): number {
+    return Array.isArray(this.trainingActId) ? this.trainingActId.length : 0
+  }
+
+  /** True when the plain "Certificate" option is selected (not completion, SOA or SOR). */
+  get isPlainCertificate(): boolean {
+    const v = this.HFormGroup1?.value
+    return !!v && v.certificateType === 'C' && v.certificateReportType === 'certificate'
+  }
+
+  /** Show the 2 / 3 pages choice: non-23 layout, plain certificate, more than 25 units. */
+  get showPageOption(): boolean {
+    return this.userInfo?.college_id !== 23
+      && this.isPlainCertificate
+      && this.unitCount > EXT_CERTIFICATE_UNIT_LIMIT
+  }
+
+  /** Value for the non-23 certificate type radio group, so the current choice shows as selected. */
+  get certificateOption(): string {
+    const v = this.HFormGroup1?.value
+    if (!v) return ''
+    if (v.certificateType === 'C') {
+      return v.certificateReportType === 'certificate_complete' ? 'completion' : 'certificate'
+    }
+    return v.certificateType
+  }
+
   public issuedFlagChange(newValue) {
     if (newValue == 'Y') {
       this.getCertificateIssueNumber(this.HFormGroup1.get('certificateType')?.value)
@@ -245,7 +277,6 @@ export class CertificateComponent implements OnInit, OnDestroy {
 
         if (this.issueNumber) {
           this.issueNumber = this.issueNumber.split(":")[1].trim();
-         
 
           this.HFormGroup1.patchValue({
             certificateIssueNumber: this.issueNumber
@@ -354,6 +385,8 @@ export class CertificateComponent implements OnInit, OnDestroy {
 
     const certificateBody = { ...this.HFormGroup1.value };
 
+    // pageCount only decides which report opens; it is not sent to the API.
+    delete certificateBody.pageCount;
 
     certificateBody.Issuedflag = 'Y';
     certificateBody.completionDate = this.datePipe.transform(certificateBody.completionDate, 'yyyy-MM-dd');
@@ -409,18 +442,23 @@ export class CertificateComponent implements OnInit, OnDestroy {
     switch (certificateType) {
       case 'C':
         if (this.HFormGroup1.value.certificateReportType === 'certificate_complete') {
-            return 'certificate_complete';
+          return 'certificate_complete';
         }
 
         if (isCollege23 && isNSW) {
-            return `certificate_nsw_${this.HFormGroup1.value.staffId}`;
+          return `certificate_nsw_${this.HFormGroup1.value.staffId}`;
         }
-        else if (this.trainingActId.length > 25) {
-        return 'extcertificate';
+
+        // More than 25 units: 2 pages (default) = extcertificate, 3 pages = temp_extcertificate.
+        if (this.unitCount > EXT_CERTIFICATE_UNIT_LIMIT) {
+          if (!isCollege23 && this.HFormGroup1.value.pageCount === '3') {
+            return 'temp_extcertificate';
+          }
+          return 'extcertificate';
         }
-        else {
-          return `certificate`;
-        }
+
+        // 25 units or fewer: standard certificate, no pages option.
+        return 'certificate';
 
       case 'S':
         return 'attainment';
@@ -437,43 +475,46 @@ export class CertificateComponent implements OnInit, OnDestroy {
     }
   }
 
- private _handleCertificateSuccess(certificateBody: any, data: any) {
-  const reportType = this._getCertificateReportType(certificateBody);
+  private _handleCertificateSuccess(certificateBody: any, data: any) {
+    const reportType = this._getCertificateReportType(certificateBody);
 
-  if (reportType) {
-    const { college_id, refresh_token } = this.userInfo;
+    if (reportType) {
+      const { college_id, refresh_token } = this.userInfo;
 
-    const authority = this.HFormGroup1.value.authority; // C or D
+      const authority = this.HFormGroup1.value.authority; // C or D
 
-    let reportName = reportType;
+      let reportName = reportType;
 
-    if (authority === 'D') {
-      reportName += '_2';
+      // Director signature: certificate_2, extcertificate_2, ...
+      // Exception: 3 pages + Director uses the temp_certificate_2 report.
+      if (authority === 'D') {
+        reportName = reportType === 'temp_extcertificate'
+          ? 'temp_certificate_2'
+          : reportName + '_2';
+      }
+
+      if (reportType === 'certificate_complete') {
+        const location = this.HFormGroup1.value.location_type;
+
+        if (location === 'S') {
+          reportName += '_Syd';
+        }
+        else if (location === 'G') {
+          reportName += '_Gold';
+        }
+        else if (location === 'P') {
+          reportName += '_Perth';
+        }
+      }
+
+      const url =
+        `https://api.wonderit.com.au:8000/album/report/?inst_id=${college_id}&type=${reportName}&sid=${data}&_token=${refresh_token}`;
+
+      window.open(url, '_blank');
     }
 
-    if (reportType === 'certificate_complete') {
-
-    const location = this.HFormGroup1.value.location_type;
-
-    if (location === 'S') {
-        reportName += '_Syd';
-    }
-    else if (location === 'G') {
-        reportName += '_Gold';
-    }
-     else if (location === 'P') {
-        reportName += '_Perth';
-    }
-}
-
-    const url =
-      `https://api.wonderit.com.au:8000/album/report/?inst_id=${college_id}&type=${reportName}&sid=${data}&_token=${refresh_token}`;
-
-    window.open(url, '_blank');
+    this.router.navigate(['/admin/certificate/all-student']);
   }
-
-  this.router.navigate(['/admin/certificate/all-student']);
-}
 
   private _showErrorUI() {
     const show = document.getElementById('closebtn');
@@ -524,45 +565,30 @@ export class CertificateComponent implements OnInit, OnDestroy {
         show.style.display = 'block'
       }
     }
-
-
-    
   }
 
-
   onCertificateSelection(value: string) {
-
     if (value === 'certificate') {
-
-        this.HFormGroup1.patchValue({
-            certificateType: 'C',
-            certificateReportType: 'certificate'
-        });
-
+      this.HFormGroup1.patchValue({
+        certificateType: 'C',
+        certificateReportType: 'certificate'
+      });
     }
     else if (value === 'completion') {
-
-        this.HFormGroup1.patchValue({
-            certificateType: 'C',
-            certificateReportType: 'certificate_complete'
-        });
-
+      this.HFormGroup1.patchValue({
+        certificateType: 'C',
+        certificateReportType: 'certificate_complete',
+        pageCount: '2'
+      });
     }
     else {
-
-        this.HFormGroup1.patchValue({
-            certificateType: value,
-            certificateReportType: ''
-        });
-
+      this.HFormGroup1.patchValue({
+        certificateType: value,
+        certificateReportType: '',
+        pageCount: '2'
+      });
     }
-
-    console.log(this.HFormGroup1.value);
-console.log(this.HFormGroup1.value.certificateReportType);
-
-}
-
-
+  }
 
   previewCertificate() {
     window.open(`https://api.wonderit.com.au:8000/report/edit?inst_id=${this.userInfo.college_id}`)

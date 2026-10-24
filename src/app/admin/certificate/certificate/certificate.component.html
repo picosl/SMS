@@ -106,7 +106,7 @@
                       style="padding-top: 15px;">
                       <label class="example col-lg-3 col-md-3 col-sm-3; asterisk">Certificate
                         Type</label>
-                      <mat-radio-group class="col-lg-9 col-md-9 col-sm-9"
+                      <mat-radio-group class="col-lg-9 col-md-9 col-sm-9" [value]="certificateOption"
                         (change)="onCertificateSelection($event.value)">
                         <mat-radio-button
                           class="example-margin d-xs-inline-block d-sm-inline-block d-md-inline-block d-lg-inline-block"
@@ -181,6 +181,31 @@
 
                       </div>
 
+                      <!-- Pages: plain Certificate with more than 25 units -->
+                      <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="showPageOption">
+
+                        <mat-form-field class="example-full-width mb-3">
+
+                          <label class="example col-lg-2 col-md-2 col-sm-3">
+                            Pages
+                          </label>
+
+                          <mat-select formControlName="pageCount">
+
+                            <mat-option value="2">
+                              2 Pages
+                            </mat-option>
+
+                            <mat-option value="3">
+                              3 Pages
+                            </mat-option>
+
+                          </mat-select>
+
+                        </mat-form-field>
+
+                      </div>
+
                     </div>
 
                     <div *ngIf="this.userInfo.college_id !== 23" class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
@@ -199,7 +224,7 @@
                       <label class="example col-lg-2 col-md-2 col-sm-3; asterisk">Certificate
                         Type</label>
                       <mat-radio-group class="col-lg-10 col-md-10 col-sm-10" formControlName="certificateType"
-                        (change)="onCertificateSelection($event.value)"> >
+                        (change)="onCertificateSelection($event.value)">
                         <mat-radio-button
                           class="example-margin d-xs-inline-block d-sm-inline-block d-md-inline-block d-lg-inline-block"
                           value="C">Certificate</mat-radio-button>

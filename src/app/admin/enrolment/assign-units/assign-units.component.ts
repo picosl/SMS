@@ -368,44 +368,75 @@ export class AssignUnitsComponent implements OnInit {
     ((this.HFormGroup1.get('Rows') as FormArray).at(rid) as FormGroup).get('AVETMISS ').patchValue(rVal)
   }
   onAddTrainingActivity() {
-    let rows = this.sendSelectedNumbers();
-    rows.forEach(rowIndex => this.HFormGroup1.value.Rows[rowIndex].statusCheck = 1);
-    this.HFormGroup1.value.Rows = this.HFormGroup1.value.Rows.filter(item => item.statusCheck == 1);
-    // console.log(this.HFormGroup1.value)
+    // Sync every row's statusCheck with its checkbox: checked = 1, unchecked = 0
+    const selectedRowIds = new Set(this.selection.selected.map(row => row.rowID));
+    this.Rows.controls.forEach(ctrl => {
+      const isChecked = selectedRowIds.has(ctrl.get('rowID')?.value);
+      ctrl.get('statusCheck').setValue(isChecked ? 1 : 0);
+    });
+
+    const allRows = this.Rows.getRawValue();
+
     if (this.trainingData) {
-      let editTraning = this.HFormGroup1.value.Rows;
-      console.log('data',editTraning);
-      (this.HFormGroup2.get('trainingArray') as FormArray).removeAt(0);
-      for (let i = 0; i < editTraning.length; i++) {
-        let rowData1 = this.fb.group({
-          trainingActivityId: editTraning[i].trainingActivityId,
-          statusCheck: 1,
-          unitId: editTraning[i].unitId,
-          unitName: editTraning[i].unitName,
-          classSetupId: editTraning[i].classSetupId,
-          outcomeNationalId: editTraning[i].outcomeNationalId,
-          outcomeTrainingOrgId: editTraning[i].outcomeNationalId,
-          startDate: this.datePipe.transform(editTraning[i].startDate, 'yyyy-MM-dd'),
-          endDate: this.datePipe.transform(editTraning[i].endDate, 'yyyy-MM-dd'),
-          hoursAttended: editTraning[i].hoursAttended,
-          unitCode: editTraning[i].unitCode,
-          unitType: editTraning[i].unitType,
-          vetFlag: editTraning[i].vetFlag,
-          AVETMISS: editTraning[i].AVETMISS
-        });
-        (this.HFormGroup2.get('trainingArray') as FormArray).push(rowData1)
-      }
-      console.log('finalcheck',this.HFormGroup2.value)
+      // Checked rows go with statusCheck = 1.
+      // Previously saved rows that are now unchecked go with statusCheck = 0.
+      // Unchecked rows that were never saved (no trainingActivityId) are skipped,
+      // so they don't get created in the database.
+      const editTraning = allRows.filter(row => row.statusCheck === 1 || row.trainingActivityId);
+      console.log('data', editTraning);
+
+      const trainingArray = this.HFormGroup2.get('trainingArray') as FormArray;
+      trainingArray.clear();
+      editTraning.forEach(row => {
+        trainingArray.push(this.fb.group({
+          trainingActivityId: row.trainingActivityId,
+          statusCheck: row.statusCheck,
+          unitId: row.unitId,
+          unitName: row.unitName,
+          classSetupId: row.classSetupId,
+          outcomeNationalId: row.outcomeNationalId,
+          outcomeTrainingOrgId: row.outcomeNationalId,
+          startDate: this.datePipe.transform(row.startDate, 'yyyy-MM-dd'),
+          endDate: this.datePipe.transform(row.endDate, 'yyyy-MM-dd'),
+          hoursAttended: row.hoursAttended,
+          unitCode: row.unitCode,
+          unitType: row.unitType,
+          vetFlag: row.vetFlag,
+          AVETMISS: row.AVETMISS
+        }));
+      });
+      console.log('finalcheck', this.HFormGroup2.value)
       this.apiService.postAPI(`edittrainingactivity?id=${this.enrolmentID}`, this.HFormGroup2.value).subscribe((data) => {
         this.router.navigate(['/admin/enrolment/all-student'])
       })
     }
     else {
-      this.apiService.postAPI('addtrainingactivity', this.HFormGroup1.value).subscribe((data) => {
+      const payload = {
+        ...this.HFormGroup1.getRawValue(),
+        Rows: allRows.filter(row => row.statusCheck === 1)
+      };
+      this.apiService.postAPI('addtrainingactivity', payload).subscribe((data) => {
         this.router.navigate(['/admin/enrolment/all-student'])
       })
     }
-
+  }
+  // Rebuilds the table from the form rows while keeping the current checkbox selection.
+  // SelectionModel compares by object reference, so selected rows must be re-mapped
+  // onto the new row objects, matched by rowID.
+  private refreshTable(extraSelectedRowIds: number[] = []) {
+    const selectedRowIds = new Set([
+      ...this.selection.selected.map(row => row.rowID),
+      ...extraSelectedRowIds
+    ]);
+    this.dataSource = new MatTableDataSource(this.Rows.value);
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.selection.clear();
+    this.dataSource.data.forEach(row => {
+      if (selectedRowIds.has(row.rowID)) {
+        this.selection.select(row);
+      }
+    });
   }
   addMoreUnits() {
     let tempDirection;
@@ -419,34 +450,34 @@ export class AssignUnitsComponent implements OnInit {
       direction: tempDirection,
     });
     dialogRef.afterClosed().subscribe((data: any) => {
-      if (data.length > 0) {
-        this.masterToggle()
-        let j = this.units.length + data.length
-        for (let i = this.units.length, k = 0; i < j; i++, k++) {
+      if (data && data.length > 0) {
+        const newRowIds: number[] = [];
+        // Start after the existing rows so rowIDs stay unique even if units are added more than once
+        const startIndex = this.Rows.length;
+        data.forEach((unit, k) => {
+          const rowID = startIndex + k;
+          newRowIds.push(rowID);
           let rowData1 = this.fb.group({
-            rowID: i,
+            rowID: rowID,
             trainingActivityId: '',
             statusCheck: 0,
-            unitId: data[k].unitid,
-            unitCode: data[k].unitcode,
-            unitName: data[k].unitname,
+            unitId: unit.unitid,
+            unitCode: unit.unitcode,
+            unitName: unit.unitname,
             unitType: 'C',
             vetFlag: 'Y',
             AVETMISS: 'Y',
             classSetupId: null,
             outcomeNationalId: 9,
             outcomeTrainingOrgId: null,
-            startDate: this.datePipe.transform(data[k].startdate, 'yyyy-MM-dd'),
-            endDate: this.datePipe.transform(data[k].enddate, 'yyyy-MM-dd'),
-            hoursAttended: data[k].hoursattended
+            startDate: this.datePipe.transform(unit.startdate, 'yyyy-MM-dd'),
+            endDate: this.datePipe.transform(unit.enddate, 'yyyy-MM-dd'),
+            hoursAttended: unit.hoursattended
           });
           (this.HFormGroup1.get('Rows') as FormArray).push(rowData1)
-        }
-        this.dataSource = new MatTableDataSource() // create new object
-        this.dataSource.data = this.Rows.value
-        this.dataSource.paginator = this.paginator
-        this.dataSource.sort = this.sort
-        this.masterToggle()
+        });
+        // Keep the user's existing checks and tick the newly added units
+        this.refreshTable(newRowIds);
       }
     });
   }
